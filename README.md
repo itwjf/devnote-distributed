@@ -26,26 +26,21 @@
 1. 克隆项目：
    ```bash
    git clone https://gitee.com/ItWjf/devnote-blog.git
-配置数据库：
-确保已安装 MySQL
-创建数据库：CREATE DATABASE devnote;
+2. 配置数据库： 确保已安装 MySQL
+3. 创建数据库：CREATE DATABASE devnote;
 修改 src/main/resources/application.properties 中的数据库连接信息
-启动项目：
-Bash
-编辑
+4. 启动项目：
 ./mvnw spring-boot:run
-访问应用：
-Text
-编辑
+5. 访问应用：
 http://localhost:8080
-📝 开发说明
+## 📝 开发说明
 本项目通过 Spring Boot 提供动态页面服务，不可使用 VS Code Live Server 等静态服务器预览。
 所有页面跳转必须通过 http://localhost:8080 访问，以确保后端路由正常工作。
-🌟 后续计划
-实现“保存文章”功能（表单提交 + 数据入库）
-添加文章详情页
-支持编辑与删除
-增加创建时间显示
-优化页面样式
-🙌 感谢
+## 🌟 后续计划
+* 实现“保存文章”功能（表单提交 + 数据入库）
+* 添加文章详情页
+* 支持编辑与删除
+* 增加创建时间显示
+* 优化页面样式
+## 🙌 感谢
 感谢 Spring Boot 官方文档与开源社区，本项目为学习实践项目。
