@@ -4,9 +4,12 @@ import com.example.devnote.entity.Post;
 import com.example.devnote.repository.PostRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -65,8 +68,13 @@ public class BlogController {
      * 这叫 “数据绑定”（Data Binding）
      */
     @PostMapping("/save")
-    public String savePost(Post post) {
+    public String savePost(@Valid Post post, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            // 如果验证失败，返回新文章页面并显示错误信息
+            return "new";
+        }
         // 保存文章到数据库
+        post.setCreatedAt(LocalDateTime.now());//设置创建时间
         postRepository.save(post);
         // 重定向到首页，防止重复提交
         return "redirect:/";

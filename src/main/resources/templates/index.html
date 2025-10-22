@@ -24,7 +24,12 @@
         <div class="card-body">
             <!-- th:text="${post.title}" -->
             <!-- 动态显示文章标题 -->
-            <h5 th:text="${post.title}" class="card-title"></h5>
+            <h5 th:text="${post.title}" class="card-title">
+                <a th:href="@{/posts/{id}(id = ${post.id})}"
+                   th:text="${post.title}"
+                   class="text-decoration-none">
+                </a>
+            </h5>
 
             <!-- th:text="${post.content}" -->
             <!-- 显示文章内容 -->

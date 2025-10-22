@@ -2,6 +2,8 @@ package com.example.devnote.entity;
 
 import jakarta.persistence.*;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
@@ -29,6 +31,8 @@ public class Post {
      * 表示这是一个数据库字段，且不允许为 NULL
      * 生成的 SQL 会是：title VARCHAR(255) NOT NULL
      */
+    @NotEmpty(message = "标题不为空")
+    @Size(max =255,message = "标题长度不能超过255个字符")
     @Column(nullable = false)
     private String title;
 
@@ -37,6 +41,7 @@ public class Post {
      * 适合存储长文本（如文章内容）
      * columnDefinition = "TEXT" 指定数据库类型为 TEXT（而不是默认的 VARCHAR(255)）
      */
+    @NotEmpty(message = "内容不能为空")
     @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
