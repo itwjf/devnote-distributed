@@ -1,0 +1,27 @@
+package com.example.devnote.repository;
+
+import com.example.devnote.entity.Post;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Repository 设计模式：封装了对数据库的操作（增删改查）
+ *
+ * JpaRepository<Post, Long> 是 Spring Data JPA 提供的接口
+ * - 第一个泛型：操作的实体类 → Post
+ * - 第二个泛型：主键类型 → Long
+ *
+ * 只要继承它，就自动拥有：
+ * - save()     → 保存
+ * - findById() → 根据 ID 查询
+ * - findAll()  → 查询所有
+ * - delete()   → 删除
+ * - count()    → 统计数量
+ *
+ * 不用手写 SQL，也不用手写实现类！
+ */
+@Repository // 标记这是一个 Spring Bean，会被自动扫描和管理
+public interface PostRepository extends JpaRepository<Post,Long> {
+    // 暂时不需要写任何方法
+    // 因为父接口已经提供了常用 CRUD 操作
+}
