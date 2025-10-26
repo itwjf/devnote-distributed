@@ -12,7 +12,7 @@
     <!-- 表单提交到 /save，方法为 POST -->
     <!-- th:object="${post}" 表示绑定一个 Post 对象 -->
     <!-- Spring MVC 会自动把表单字段映射到 Post 的属性上 -->
-    <form th:object="${post}" action="/save" method="post">
+    <form th:object="${post}" action="/posts/save" method="post">
         <div class="mb-3">
             <label for="title" class="form-label">标题</label>
             <!-- th:field="*{title}" 绑定 Post 的 title 字段 -->

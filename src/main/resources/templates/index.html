@@ -1,50 +1,53 @@
 <!DOCTYPE html>
-<!--
-  thymeleaf 命名空间声明
-  这样才能使用 th:* 属性
--->
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>DevNote 博客</title>
-  <!-- 引入 Bootstrap CDN，让页面好看一点 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-4">
     <h1 class="mb-4">DevNote 博客</h1>
 
-    <!-- 写新文章按钮 -->
-    <a href="/new" class="btn btn-primary mb-3">写新文章</a>
+    <!-- ✅ 登录状态控制 -->
+    <div sec:authorize="isAuthenticated()">
+        <a href="/posts/new" class="btn btn-primary mb-3">✏️ 写新文章</a>
+        <span class="ms-3 text-success">欢迎回来，<strong sec:authentication="name"></strong>！</span>
+    </div>
 
-    <!-- 文章列表 -->
-    <!-- th:each="post : ${posts}" -->
-    <!-- 含义：遍历 Controller 传来的 posts 列表，每个元素叫 post -->
-    <div th:each="post : ${posts}" class="card mb-3">
+    <div sec:authorize="isAnonymous()" class="alert alert-info" role="alert">
+        你还没有登录，请
+        <a href="/login" class="alert-link">登录</a>
+        或
+        <a href="/register" class="alert-link">注册</a>
+        后再写文章。
+    </div>
+
+    <!-- ✅ 文章列表 -->
+    <div th:if="${posts}" th:each="post : ${posts}" class="card mb-3 shadow-sm">
         <div class="card-body">
-            <!-- th:text="${post.title}" -->
-            <!-- 动态显示文章标题 -->
-            <h5 th:text="${post.title}" class="card-title">
-                <a th:href="@{/posts/{id}(id = ${post.id})}"
+<!--            标题 ：点击标题跳转至文章详情页面-->
+            <h5 class="card-title">
+                <a th:href="@{/posts/{id}(id=${post.id})}"
                    th:text="${post.title}"
-                   class="text-decoration-none">
-                </a>
+                   class="text-decoration-none text-dark"></a>
             </h5>
 
-            <!-- th:text="${post.content}" -->
-            <!-- 显示文章内容 -->
-            <p th:text="${post.content}" class="card-text text-muted"></p>
+            <p th:text="${#strings.abbreviate(post.content, 100)}" class="card-text text-muted"></p>
 
-            <!-- 格式化时间显示 -->
-            <!-- #temporals.format() 是 Thymeleaf 的时间工具 -->
-            <small th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"
-                   class="text-muted"></small>
+            <div class="d-flex justify-content-between text-secondary small">
+                <span>作者：
+                    <span th:text="${post.author != null ? post.author.username : '匿名'}"></span>
+                </span>
+                <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
         </div>
     </div>
 
-    <!-- 如果没有文章，显示提示 -->
+    <!-- 没有文章时的提示 -->
     <div th:if="${#lists.isEmpty(posts)}" class="alert alert-info">
-        暂无文章，快去 <a href="/new">写一篇</a> 吧！
+        暂无文章，快去 <a href="/posts/new">写一篇</a> 吧！
     </div>
 </div>
 </body>

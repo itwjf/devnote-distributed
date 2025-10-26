@@ -1,12 +1,19 @@
 package com.example.devnote.controller;
 
 import com.example.devnote.entity.Post;
+import com.example.devnote.entity.User;
 import com.example.devnote.repository.PostRepository;
+import com.example.devnote.repository.UserRepository;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -27,9 +34,12 @@ public class BlogController {
      * - 是 Spring 官方推荐的方式
      */
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
-    public BlogController(PostRepository postRepository) {
+    //用构造函数注入
+    public BlogController(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -38,10 +48,11 @@ public class BlogController {
      *
      * Model 是 Spring 提供的对象，用于向页面传递数据
      */
-    @GetMapping("/")
+    @GetMapping({"/","/posts"})
     public String index(Model model) {
         // 调用 Repository 查询所有文章
-        List<Post> posts = postRepository.findAll();
+        //查询的时候按照时间倒序排列，使用户体验更好
+        List<Post> posts = postRepository.findAll(Sort.by(Sort.Direction.DESC,"createdAt"));//使用了 Spring Data JPA 的排序功能，保持用户体验一致性
         // 把数据放入 Model，键是 "posts"，值是文章列表
         model.addAttribute("posts",posts);
         // 返回视图名称：index.html
@@ -53,7 +64,7 @@ public class BlogController {
      * @GetMapping("/new") 处理 /new 的 GET 请求
      * 显示写新文章的表单页面
      */
-    @GetMapping("/new")
+    @GetMapping("/posts/new")
     public String newPostForm(Model model) {
         // 创建一个空的 Post 对象，用于表单绑定
         model.addAttribute("post", new Post());
@@ -67,15 +78,19 @@ public class BlogController {
      * Spring MVC 会自动把表单字段（title、content）映射到 Post 对象的属性上
      * 这叫 “数据绑定”（Data Binding）
      */
-    @PostMapping("/save")
-    public String savePost(@Valid Post post, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            // 如果验证失败，返回新文章页面并显示错误信息
-            return "new";
-        }
-        // 保存文章到数据库
-        post.setCreatedAt(LocalDateTime.now());//设置创建时间
+    @PostMapping("/posts/save")
+    public String savePost(@ModelAttribute Post post) {
+        // 从 Spring Security 中获取当前登录的用户名
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        // 查询用户对象
+        User currentUser = userRepository.findByUsername(username);
+        // 设置作者
+        post.setAuthor(currentUser);
+// 保存到数据库
         postRepository.save(post);
+
         // 重定向到首页，防止重复提交
         return "redirect:/";
     }

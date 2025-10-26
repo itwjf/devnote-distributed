@@ -52,7 +52,16 @@ public class Post {
      * 比如执行 update 时，createdAt 不会被更新
      */
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    /**
+     * 多篇文章对应一个用户
+     * ManyToOne 表示“多对一”关系
+     * fetch = FetchType.LAZY 可以提升性能（延迟加载）
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")//外键列名
+    private User author;
 
 
     public Post() {
@@ -93,5 +102,11 @@ public class Post {
         this.createdAt = createdAt;
     }
 
+    public User getAuthor() {
+        return author;
+    }
 
+    public void setAuthor(User author) {
+        this.author = author;
+    }
 }
