@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -89,6 +90,12 @@ public class BlogController {
         return "redirect:/";
     }
 
+    /**
+     * 文章详情页
+     * @param id
+     * @param model
+     * @return
+     */
     @GetMapping("/posts/{id}")
     public String viewPost(@PathVariable Long id,Model model){
         Post post = postRepository.findById(id)
@@ -97,5 +104,60 @@ public class BlogController {
         model.addAttribute("post",post);
 
         return "post-detail";
+    }
+
+    /**
+     * 文件编辑页面
+     * @param id
+     * @param model
+     * @param principal
+     * @return
+     */
+    @GetMapping("/posts/{id}/edit")
+    public String editPOst(@PathVariable Long id, Model model, Principal principal){
+        Post post = postRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("文章不存在"));
+
+        if (!post.getAuthor().getUsername().equals(principal.getName())){
+            throw new RuntimeException("你没有权限编辑这篇文章");
+        }
+
+        //将文章传递给模板
+        model.addAttribute("post",post);
+        return "edit_post";
+    }
+
+    /**
+     *更新文章内容
+     * @param id
+     * @param updatedPost
+     * @param principal
+     * @return
+     */
+    @PostMapping("/posts/{id}/edit")
+    public String updatePost(@PathVariable Long id,
+                             @ModelAttribute Post updatedPost,
+                             Principal principal){
+        //查找原文章
+        //查找数据库中的对象
+        Post existingPost = postRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("文章不存在"));
+
+        //权限校验
+        if (!existingPost.getAuthor().getUsername().equals(principal.getName())){
+            throw new RuntimeException("你没有权限编辑这篇文章");
+        }
+
+        //更新字段
+        //修改数据库中的对象，而不是直接保存前端传来的对象，更安全
+        existingPost.setTitle(updatedPost.getTitle());
+        existingPost.setContent(updatedPost.getContent());
+
+        //保存修改
+        //save方法特性：对象有ID就执行update，没有ID就执行insert
+        postRepository.save(existingPost);
+
+        //返回文章详情页
+        return "redirect:/posts/" + id;
     }
 }

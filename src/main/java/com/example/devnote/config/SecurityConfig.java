@@ -52,7 +52,7 @@ public class SecurityConfig {
                         //允许未登录用户查看文章（首页，详情页，错误页面）
                         .requestMatchers("/","/posts/**").permitAll()
                         //写文章必须登录
-                        .requestMatchers("/posts/new","/posts/save").authenticated()
+                        .requestMatchers("/posts/new","/posts/save","/posts/*/edit").authenticated()
                         // 其他请求都需要登录
                         .anyRequest().authenticated()
                 )

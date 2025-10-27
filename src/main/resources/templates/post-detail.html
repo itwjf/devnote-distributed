@@ -26,6 +26,15 @@
     </p>
   </div>
 
+  <div class="mt-3">
+    <a href="/" class="btn btn-secondary">返回首页</a>
+
+    <!-- 登录用户且是作者本人时显示“编辑”按钮 -->
+    <a th:if="${#authentication.name == post.author.username}"
+       th:href="@{'/posts/' + ${post.id} + '/edit'}"
+       class="btn btn-warning ms-2">编辑</a>
+  </div>
+
 </div>
 </body>
 </html>
