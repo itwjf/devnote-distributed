@@ -160,4 +160,26 @@ public class BlogController {
         //返回文章详情页
         return "redirect:/posts/" + id;
     }
+
+    /**
+     * 删除文章（仅作者本人可删除）
+     */
+    @PostMapping("/posts/{id}/delete")
+    public String deletePost(@PathVariable Long id, Principal principal) {
+        // 查找目标文章
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("文章不存在"));
+
+        // 权限校验：仅作者本人可删除
+        if (!post.getAuthor().getUsername().equals(principal.getName())) {
+            throw new RuntimeException("你没有权限删除这篇文章");
+        }
+
+        // 执行删除操作
+        postRepository.delete(post);
+
+        // 返回首页并提示
+        return "redirect:/?deleted=true";
+    }
+
 }

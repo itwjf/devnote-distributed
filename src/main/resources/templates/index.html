@@ -23,6 +23,9 @@
         <a href="/register" class="alert-link">注册</a>
         后再写文章。
     </div>
+    <div th:if="${param.deleted}" class="alert alert-success">
+        文章已删除
+    </div>
 
     <!-- ✅ 文章列表 -->
     <div th:if="${posts}" th:each="post : ${posts}" class="card mb-3 shadow-sm">
