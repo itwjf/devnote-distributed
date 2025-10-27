@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
@@ -165,7 +166,7 @@ public class BlogController {
      * 删除文章（仅作者本人可删除）
      */
     @PostMapping("/posts/{id}/delete")
-    public String deletePost(@PathVariable Long id, Principal principal) {
+    public String deletePost(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
         // 查找目标文章
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("文章不存在"));
@@ -178,8 +179,10 @@ public class BlogController {
         // 执行删除操作
         postRepository.delete(post);
 
+        // 使用 RedirectAttributes 添加临时提示信息（Flash Attribute）
+        redirectAttributes.addFlashAttribute("message", "文章《" + post.getTitle() + "》已删除");
         // 返回首页并提示
-        return "redirect:/?deleted=true";
+        return "redirect:/";
     }
 
 }
