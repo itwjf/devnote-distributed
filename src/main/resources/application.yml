@@ -7,6 +7,7 @@ spring:
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+
   jpa:
     hibernate:
       ddl-auto: update  # 自动建表
@@ -20,3 +21,13 @@ spring:
     cache: false
     prefix: classpath:/templates/
     suffix: .html
+
+  web:
+    resources:
+      add-mappings: true  # 禁止自动映射静态资源路径，让404能被GlobalExceptionHandler捕获
+
+
+server:
+  error:
+    whitelabel:
+      enabled: false   # 禁用 Spring Boot 默认的白标签错误页

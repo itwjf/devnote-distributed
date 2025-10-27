@@ -9,14 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -93,5 +87,15 @@ public class BlogController {
 
         // 重定向到首页，防止重复提交
         return "redirect:/";
+    }
+
+    @GetMapping("/posts/{id}")
+    public String viewPost(@PathVariable Long id,Model model){
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("文章未找到"));
+
+        model.addAttribute("post",post);
+
+        return "post-detail";
     }
 }
