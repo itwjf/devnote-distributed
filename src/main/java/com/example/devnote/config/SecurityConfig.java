@@ -64,8 +64,10 @@ public class SecurityConfig {
                 )
                 // 登出配置
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutUrl("/logout")// 请求地址
+                        .logoutSuccessUrl("/")// 退出后跳转页面
+                        .invalidateHttpSession(true)// 清空 session
+                        .deleteCookies("JSESSIONID") // 删除 cookie
                         .permitAll()
                 )
                 // 关闭 CSRF（开发阶段）

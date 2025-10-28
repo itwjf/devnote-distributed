@@ -8,20 +8,26 @@
 </head>
 <body>
 <div class="container mt-4">
-    <h1 class="mb-4">DevNote 博客</h1>
+    <h1><a th:href="@{/}">DevNote 博客</a></h1>
 
-    <!-- ✅ 登录状态控制 -->
-    <div sec:authorize="isAuthenticated()">
-        <a href="/posts/new" class="btn btn-primary mb-3">✏️ 写新文章</a>
-        <span class="ms-3 text-success">欢迎回来，<strong sec:authentication="name"></strong>！</span>
-    </div>
+    <div class="nav-actions">
+        <!-- ✅ 登录状态 -->
+        <div th:if="${#authorization.expression('isAuthenticated()')}">
+            <span>欢迎，<strong th:text="${#authentication.name}"></strong></span>
+            <a th:href="@{/posts/new}" class="btn">写新文章</a>
 
-    <div sec:authorize="isAnonymous()" class="alert alert-info" role="alert">
-        你还没有登录，请
-        <a href="/login" class="alert-link">登录</a>
-        或
-        <a href="/register" class="alert-link">注册</a>
-        后再写文章。
+            <!-- 🔒 安全退出（POST 方式） -->
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-logout">退出</button>
+            </form>
+        </div>
+
+        <!-- 🚪 未登录状态 -->
+        <div th:if="${!#authorization.expression('isAuthenticated()')}">
+            <a th:href="@{/login}" class="btn">登录</a>
+            <a th:href="@{/register}" class="btn">注册</a>
+            <span class="tip">请先登录后才能写文章</span>
+        </div>
     </div>
 
     <div th:if="${message}" class="alert alert-success" role="alert">
