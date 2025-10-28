@@ -1,8 +1,11 @@
 package com.example.devnote.repository;
 
 import com.example.devnote.entity.Post;
+import com.example.devnote.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Repository 设计模式：封装了对数据库的操作（增删改查）
@@ -24,4 +27,11 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post,Long> {
     // 暂时不需要写任何方法
     // 因为父接口已经提供了常用 CRUD 操作
+
+    /**
+     * 根据作者查找文章
+     * @param user 作者
+     * @return 文章列表
+     */
+    List<Post> findByAuthorOrderByCreatedAtDesc(User user);
 }

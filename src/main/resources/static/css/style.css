@@ -132,3 +132,14 @@
     color: #ccc;
 }
 
+.author-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.author-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

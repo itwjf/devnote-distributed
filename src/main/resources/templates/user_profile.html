@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${profileUser.username} + '的主页'">用户主页</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+
+  <h1 th:text="${profileUser.username} + ' 的主页'"></h1>
+
+  <!-- 个人信息 -->
+  <div class="user-info">
+    <img th:src="${profileUser.avatar != null ? profileUser.avatar : '/images/default-avatar.png'}"
+         alt="头像" class="avatar">
+    <p th:text="${profileUser.bio != null ? profileUser.bio : '这个人很神秘，什么也没写~'}"></p>
+
+    <div th:if="${isSelf}">
+      <a th:href="@{'/user/' + ${profileUser.username} + '/edit'}" class="btn-edit">编辑资料</a>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- 文章列表 -->
+  <h2>Ta 的文章</h2>
+  <div th:if="${#lists.isEmpty(posts)}">
+    <p>还没有发表任何文章。</p>
+  </div>
+
+  <ul class="post-list" th:if="${!#lists.isEmpty(posts)}">
+    <li th:each="post : ${posts}">
+<!--      点击文章标题，跳转到文章详情页面-->
+      <a th:href="@{'/posts/' + ${post.id}}" th:text="${post.title}"></a>
+      <span class="post-date" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+    </li>
+  </ul>
+
+  <hr>
+  <p><a th:href="@{/}">返回首页</a></p>
+</div>
+</body>
+</html>

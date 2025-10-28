@@ -2,6 +2,8 @@ package com.example.devnote.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -18,6 +20,17 @@ public class User {
 
     @Column(nullable = false)
     private String role = "ROLE_USER";// 默认角色（Spring Security 规范要求前缀 ROLE_）
+
+    /** 用户头像URL */
+    private String avatar = "/images/default-avatar.png";
+
+    /** 个人简介 */
+    @Column(length = 500)
+    private String bio = "这个人很神秘，什么也没写~";
+
+    //关联关系
+    @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Post> posts;
 
     public User() {
     }
@@ -58,5 +71,29 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 }
