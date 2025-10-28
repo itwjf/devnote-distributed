@@ -1,4 +1,6 @@
 # application.yml
+file:
+  upload-dir: D:/devnote/uploads/   # 👉 本地存储目录，可改成任意本地路径
 spring:
   datasource:
     # 连接本地 MySQL，使用端口 3306
@@ -25,8 +27,6 @@ spring:
   web:
     resources:
       add-mappings: true  # 禁止自动映射静态资源路径，让404能被GlobalExceptionHandler捕获
-
-
 server:
   error:
     whitelabel:

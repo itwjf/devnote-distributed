@@ -143,3 +143,24 @@
     color: #0056b3;
     text-decoration: underline;
 }
+
+.btn-edit {
+    display: inline-block;
+    padding: 6px 14px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-top: 10px;
+}
+
+.btn-edit:hover {
+    background-color: #0056b3;
+}
+
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-top: 8px;
+}
