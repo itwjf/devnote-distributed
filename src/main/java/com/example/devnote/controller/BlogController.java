@@ -1,7 +1,9 @@
 package com.example.devnote.controller;
 
+import com.example.devnote.entity.Comment;
 import com.example.devnote.entity.Post;
 import com.example.devnote.entity.User;
+import com.example.devnote.repository.CommentRepository;
 import com.example.devnote.repository.PostRepository;
 import com.example.devnote.repository.UserRepository;
 import org.springframework.data.domain.Sort;
@@ -32,10 +34,13 @@ public class BlogController {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    private final CommentRepository commentRepository;
+
     //用构造函数注入
-    public BlogController(PostRepository postRepository, UserRepository userRepository) {
+    public BlogController(PostRepository postRepository, UserRepository userRepository,CommentRepository commentRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
     }
 
     /**
@@ -102,9 +107,14 @@ public class BlogController {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("文章未找到"));
 
-        model.addAttribute("post",post);
 
-        return "post-detail";
+        List<Comment> comments = commentRepository.findByPostAndParentIsNullOrderByCreatedAtAsc(post);
+
+
+        model.addAttribute("post",post);
+        model.addAttribute("comments",comments);
+
+        return "post_detail";
     }
 
     /**

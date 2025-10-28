@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @Entity 表示这个类是一个 JPA 实体，会映射到数据库的一张表
@@ -63,6 +64,9 @@ public class Post {
     @JoinColumn(name = "user_id")//外键列名
     private User author;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
 
     public Post() {
         // JPA 要求实体类必须有一个无参构造函数
@@ -108,5 +112,13 @@ public class Post {
 
     public void setAuthor(User author) {
         this.author = author;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 }

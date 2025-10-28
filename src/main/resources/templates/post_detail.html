@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${post.title}">文章详情</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+
+  <!-- 标题 -->
+  <h1 th:text="${post.title}" class="post-title"></h1>
+
+  <!-- 元信息 -->
+  <div class="post-meta">
+    <p>作者：<span th:text="${post.author.username}"></span></p>
+    <p>发布时间：<span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+  </div>
+
+  <!-- 文章内容 -->
+  <div class="post-content" th:utext="${post.content}"></div>
+
+  <hr>
+
+  <!-- 评论区 -->
+  <h2>评论区</h2>
+  <div class="comment-section">
+
+    <!-- 没有评论提示 -->
+    <p th:if="${#lists.isEmpty(post.comments)}">还没有评论，快来抢沙发吧！</p>
+
+    <!-- 评论列表 -->
+    <div th:each="comment : ${post.comments}" class="comment">
+      <div class="comment-header">
+        <strong th:text="${comment.author.username}">评论者</strong>
+        <span class="comment-date"
+              th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+      </div>
+      <p th:text="${comment.content}"></p>
+
+      <!-- 删除评论按钮 -->
+      <form th:if="${#authentication.name == comment.author.username
+                   or #authentication.name == post.author.username}"
+            th:action="@{'/posts/' + ${post.id} + '/comments/' + ${comment.id} + '/delete'}"
+            method="post"
+            onsubmit="return confirm('确定要删除这条评论吗？');"
+            style="display:inline;">
+        <button type="submit" class="btn-delete">删除</button>
+      </form>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- 发表评论 -->
+  <div th:if="${#authorization.expression('isAuthenticated()')}" class="comment-form">
+    <h3>发表评论</h3>
+    <form th:action="@{'/posts/' + ${post.id} + '/comments'}" method="post">
+      <textarea name="content" rows="4" cols="60" placeholder="写下你的评论..." required></textarea>
+      <br>
+      <button type="submit" class="btn-submit">提交评论</button>
+    </form>
+  </div>
+
+  <!-- 未登录提示 -->
+  <p th:if="${!#authorization.expression('isAuthenticated()')}">
+    <a th:href="@{/login}">登录</a> 后才能发表评论。
+  </p>
+
+  <hr>
+
+  <p><a th:href="@{/}">返回首页</a></p>
+</div>
+</body>
+</html>
