@@ -39,14 +39,44 @@
       <p th:text="${comment.content}"></p>
 
       <!-- 删除评论按钮 -->
-      <form th:if="${#authentication.name == comment.author.username
-                   or #authentication.name == post.author.username}"
+      <form th:if="${#authentication.name == comment.author.username or #authentication.name == post.author.username}"
             th:action="@{'/posts/' + ${post.id} + '/comments/' + ${comment.id} + '/delete'}"
             method="post"
             onsubmit="return confirm('确定要删除这条评论吗？');"
             style="display:inline;">
         <button type="submit" class="btn-delete">删除</button>
       </form>
+
+      <!-- 子评论区 -->
+      <div th:if="${not #lists.isEmpty(comment.replies)}" class="child-comments">
+        <div th:each="reply : ${comment.replies}" class="reply">
+          <div class="comment-header">
+            <strong th:text="${reply.author.username}">评论者</strong>
+            <span class="comment-date"
+                  th:text="${#temporals.format(reply.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+          </div>
+          <p th:text="${reply.content}"></p>
+
+          <!-- 删除子评论按钮 -->
+          <form th:if="${#authentication.name == reply.author.username or #authentication.name == post.author.username}"
+                th:action="@{'/posts/' + ${post.id} + '/comments/' + ${reply.id} + '/delete'}"
+                method="post"
+                onsubmit="return confirm('确定要删除这条评论吗？');"
+                style="display:inline;">
+            <button type="submit" class="btn-delete">删除</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 回复评论按钮 -->
+      <div th:if="${#authorization.expression('isAuthenticated()')}">
+        <form th:action="@{'/posts/' + ${post.id} + '/comments'}" method="post">
+          <textarea name="content" rows="3" cols="50" th:placeholder="'回复'+ ${comment.author.username} + '的评论' " required></textarea>
+          <input type="hidden" name="parentId" th:value="${comment.id}"/>
+          <br>
+          <button type="submit" class="btn-submit">提交回复</button>
+        </form>
+      </div>
     </div>
   </div>
 

@@ -72,6 +72,9 @@ public class CommentService {
             throw new RuntimeException("你没有权限删除此评论");
         }
 
+        // 删除子评论
+        commentRepository.deleteAll(comment.getReplies());
+        //删除评论本身
         commentRepository.delete(comment);
     }
 }
