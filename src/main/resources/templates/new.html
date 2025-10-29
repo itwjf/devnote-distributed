@@ -24,6 +24,14 @@
                    required>
         </div>
 
+        <label for="visibility">访问权限：</label>
+        <select id="visibility" name="visibility" required>
+            <option value="PUBLIC">公开</option>
+            <option value="FOLLOWERS">粉丝可见</option>
+            <option value="PRIVATE">私密</option>
+        </select>
+
+
         <div class="mb-3">
             <label for="content" class="form-label">内容</label>
             <!-- th:field="*{content}" 绑定 content 字段 -->

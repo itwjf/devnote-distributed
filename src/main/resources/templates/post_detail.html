@@ -18,6 +18,14 @@
              th:text="${post.author.username}"></a></p>
     <p>发布时间：<span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
   </div>
+  <p>可见性：
+    <span th:switch="${post.visibility}">
+    <span th:case="'PUBLIC'">公开</span>
+    <span th:case="'FOLLOWERS'">粉丝可见</span>
+    <span th:case="'PRIVATE'">私密</span>
+  </span>
+  </p>
+
 
   <!-- 文章内容 -->
   <div class="post-content" th:utext="${post.content}"></div>

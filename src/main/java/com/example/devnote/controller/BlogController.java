@@ -4,9 +4,11 @@ import com.example.devnote.entity.Comment;
 import com.example.devnote.entity.Post;
 import com.example.devnote.entity.User;
 import com.example.devnote.repository.CommentRepository;
+import com.example.devnote.repository.FollowRepository;
 import com.example.devnote.repository.PostRepository;
 import com.example.devnote.repository.UserRepository;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -35,12 +37,14 @@ public class BlogController {
     private final UserRepository userRepository;
 
     private final CommentRepository commentRepository;
+    private final FollowRepository followRepository;
 
     //用构造函数注入
-    public BlogController(PostRepository postRepository, UserRepository userRepository,CommentRepository commentRepository) {
+    public BlogController(PostRepository postRepository, UserRepository userRepository,CommentRepository commentRepository,FollowRepository followRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.followRepository = followRepository;
     }
 
     /**
@@ -103,10 +107,9 @@ public class BlogController {
      * @return
      */
     @GetMapping("/posts/{id}")
-    public String viewPost(@PathVariable Long id,Model model){
+    public String viewPost(@PathVariable Long id,Model model,Principal principal){
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("文章未找到"));
-
 
         List<Comment> comments = commentRepository.findByPostAndParentIsNullOrderByCreatedAtAsc(post);
 

@@ -67,6 +67,16 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Visibility visibility = Visibility.PUBLIC;
+
+    public enum Visibility{
+        PUBLIC,
+        FOLLOWERS,
+        PRIVATE,
+    }
+
 
     public Post() {
         // JPA 要求实体类必须有一个无参构造函数
@@ -120,5 +130,13 @@ public class Post {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public Visibility getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(Visibility visibility) {
+        this.visibility = visibility;
     }
 }
