@@ -18,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
@@ -155,8 +157,9 @@ public class UserController {
             model.addAttribute("error", "头像上传失败，请重试！");
             return "user_edit_profile";
         }
+        String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
 
-        return "redirect:/user/" + username;
+        return "redirect:/user/" + encodedUsername;
     }
 
 }
