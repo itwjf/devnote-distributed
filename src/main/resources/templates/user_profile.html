@@ -16,10 +16,33 @@
          alt="头像" class="avatar">
     <p th:text="${profileUser.bio != null ? profileUser.bio : '这个人很神秘，什么也没写~'}"></p>
 
-    <div th:if="${isSelf}">
-      <a th:href="@{'/user/' + ${profileUser.username} + '/edit'}" class="btn-edit">编辑资料</a>
-    </div>
+
+  <!-- 粉丝与关注统计 -->
+  <div class="stats">
+    <span th:text="'粉丝：' + ${followersCount}"></span> |
+    <span th:text="'关注：' + ${followingCount}"></span>
   </div>
+
+  <!-- 如果是本人，则显示编辑按钮 -->
+  <div th:if="${isSelf}">
+    <a th:href="@{'/user/' + ${profileUser.username} + '/edit'}" class="btn-edit">编辑资料</a>
+  </div>
+
+  <!-- 如果不是本人，则显示关注/取关按钮 -->
+  <div th:if="${!isSelf}">
+    <form th:if="${!isFollowing}"
+          th:action="@{'/follow/' + ${profileUser.getUsername()} + '/follow'}"
+          method="post">
+      <button type="submit" class="btn btn-primary">关注</button>
+    </form>
+
+    <form th:if="${isFollowing}"
+          th:action="@{'/follow/' + ${profileUser.getUsername()} + '/unfollow'}"
+          method="post">
+      <button type="submit" class="btn btn-secondary">取消关注</button>
+    </form>
+  </div>
+
 
   <hr>
 

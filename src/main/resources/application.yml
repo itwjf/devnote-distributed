@@ -31,3 +31,10 @@ server:
   error:
     whitelabel:
       enabled: false   # 禁用 Spring Boot 默认的白标签错误页
+  tomcat:
+    uri-encoding: UTF-8
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true

@@ -3,6 +3,7 @@ package com.example.devnote.controller;
 import com.example.devnote.entity.Post;
 import com.example.devnote.entity.User;
 import com.example.devnote.repository.UserRepository;
+import com.example.devnote.service.FollowService;
 import com.example.devnote.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,10 +24,20 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    @Autowired
+    private final FollowService followService;
+
+    public UserController(UserService userService, UserRepository userRepository, FollowService followService) {
+        this.userService = userService;
+        this.userRepository = userRepository;
+        this.followService = followService;
+    }
+
 
     @Value("${file.upload-dir}")
     private String uploadDir;// 相对路径，例如 "uploads/avatar/"
@@ -41,22 +52,41 @@ public class UserController {
     public String userProfile(@PathVariable String username,
                               Authentication authentication,
                               Model model) {
+        //查询用户是否存在
         User user = userService.findByUsername(username);
         if (user == null) {
             model.addAttribute("error", "用户不存在");
             return "error";
         }
 
+        //查询用户文章
         List<Post> posts = userService.findPostsByUser(user);
 
-        // 当前登录用户是否是本人
+        // 判断当前登录用户是否是本人
         boolean isSelf = authentication != null &&
                 authentication.isAuthenticated() &&
                 authentication.getName().equals(username);
 
+        boolean isFollowing = false;
+
+        //如果当前用户已登录，判断是否已关注
+        if (!isSelf && authentication != null && authentication.isAuthenticated()){
+            String currentUsername = authentication.getName();
+            isFollowing = followService.isFollowing(currentUsername,username);
+        }
+
+        //统计粉丝数与关注数
+        long followersCount = followService.countFollowers(username);
+        long followingCount = followService.countFollowing(username);
+
+
+
         model.addAttribute("profileUser", user);
         model.addAttribute("posts", posts);
         model.addAttribute("isSelf", isSelf);
+        model.addAttribute("isFollowing",isFollowing);
+        model.addAttribute("followersCount", followersCount);
+        model.addAttribute("followingCount", followingCount);
 
         return "user_profile";
     }
