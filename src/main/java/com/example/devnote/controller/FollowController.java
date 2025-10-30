@@ -35,11 +35,11 @@ public class FollowController {
 
         try {
             followService.follow(currentUser.getUsername(), username);
-            System.out.println("✅ followService.follow() 已执行");
+            System.out.println("followService.follow() 已执行");
 
             redirectAttributes.addFlashAttribute("message", "已关注 " + username);
         } catch (RuntimeException e) {
-            System.out.println("❌ followService.follow() 执行失败：" + e.getMessage());
+            System.out.println("followService.follow() 执行失败：" + e.getMessage());
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
@@ -55,6 +55,8 @@ public class FollowController {
     public String unfollow(@PathVariable String username,
                            @AuthenticationPrincipal UserDetails currentUser,
                            RedirectAttributes redirectAttributes) {
+        System.out.println("收到取消关注请求：当前用户 = " + currentUser.getUsername() + "，目标用户 = " + username);
+
         try {
             followService.unfollow(currentUser.getUsername(), username);
             redirectAttributes.addFlashAttribute("message", "已取消关注 " + username);

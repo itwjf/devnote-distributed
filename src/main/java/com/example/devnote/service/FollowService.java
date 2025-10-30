@@ -4,11 +4,13 @@ import com.example.devnote.entity.Follow;
 import com.example.devnote.entity.User;
 import com.example.devnote.repository.FollowRepository;
 import com.example.devnote.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Transactional  //告诉Spring这个方法里的所有数据库操作要么全部成功，要么全部回滚
 public class FollowService {
 
     private final FollowRepository followRepository;
@@ -43,21 +45,30 @@ public class FollowService {
 
         System.out.println("FollowService: 正在保存关注关系：" + followerUsername + " -> " + followingUsername);
         followRepository.save(new Follow(follower,following));
-        System.out.println("✅ FollowRepository.save() 已执行");
+        System.out.println("FollowRepository.save() 已执行");
     }
 
     /**
      * 取消关注
      */
     public void unfollow(String followerUsername, String followingUsername) {
+        if(followerUsername.equals(followingUsername)){
+            throw new RuntimeException("不能取消关注自己");
+        }
+
         User follower = userRepository.findByUsername(followerUsername);
         User following = userRepository.findByUsername(followingUsername);
+
+
+        System.out.println("FollowService: 正在取消关注关系：" + followerUsername + " -> " + followingUsername);
 
         if (follower == null || following == null) {
             throw new RuntimeException("用户不存在");
         }
 
         followRepository.deleteByFollowerAndFollowing(follower, following);
+        System.out.println("已执行 deleteByFollowerAndFollowing：" + followerUsername + " -> " + followingUsername);
+
     }
 
     /**
