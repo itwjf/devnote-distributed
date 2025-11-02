@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title th:text="${profileUser.username} + '的主页'">用户主页</title>
   <link rel="stylesheet" th:href="@{/css/style.css}">
+
+
 </head>
 <body>
 <div class="container">
@@ -15,12 +17,12 @@
     <img th:src="${profileUser.avatar != null ? profileUser.avatar : '/images/default-avatar.png'}"
          alt="头像" class="avatar">
     <p th:text="${profileUser.bio != null ? profileUser.bio : '这个人很神秘，什么也没写~'}"></p>
-
+  </div>
 
   <!-- 粉丝与关注统计 -->
   <div class="stats">
     <span>粉丝：<span id="fanCount" th:text="${followersCount}">0</span></span>
-<!--    关注数暂时不用改-->
+    <!--    关注数暂时不用改-->
     <span th:text="'关注：' + ${followingCount}"></span>
   </div>
 
@@ -29,17 +31,17 @@
     <a th:href="@{'/user/' + ${profileUser.username} + '/edit'}" class="btn-edit">编辑资料</a>
   </div>
 
-    <!-- 如果不是本人，显示关注/取消关注按钮（AJAX 版本） -->
-    <!-- 收到后端传来的JSON数据，渲染到前端页面上-->
-    <div th:if="${!isSelf}">
-      <button id="followBtn"
-              class="btn"
-              th:classappend="${isFollowing} ? ' btn-secondary' : ' btn-primary'"
-              th:data-username="${profileUser.username}"
-              th:data-following="${isFollowing}">
-        <span th:text="${isFollowing} ? '取消关注' : '关注'"></span>
-      </button>
-    </div>
+  <!-- 如果不是本人，显示关注/取消关注按钮（AJAX 版本） -->
+  <!-- 收到后端传来的JSON数据，渲染到前端页面上-->
+  <div th:if="${!isSelf}">
+    <button id="followBtn"
+                class="btn"
+            th:classappend="${isFollowing} ? ' btn-secondary' : ' btn-primary'"
+            th:data-username="${profileUser.username}"
+            th:data-following="${isFollowing}">
+      <span th:text="${isFollowing} ? '取消关注' : '关注'"></span>
+    </button>
+  </div>
 
 
   <hr>
@@ -47,32 +49,39 @@
   <!-- 文章列表 -->
   <h2>Ta 的文章</h2>
   <div th:if="${#lists.isEmpty(posts)}">
-    <p>还没有发表任何文章。</p>
-  </div>
+      <p>还没有发表任何文章。</p>
+    </div>
 
-  <ul class="post-list" th:if="${!#lists.isEmpty(posts)}">
-    <li th:each="post : ${posts}">
-<!--      点击文章标题，跳转到文章详情页面-->
-      <a th:href="@{'/posts/' + ${post.id}}" th:text="${post.title}"></a>
-      <span class="post-date" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-    </li>
-  </ul>
+    <ul class="post-list" th:if="${!#lists.isEmpty(posts)}">
+      <li th:each="post : ${posts}">
+    <!--      点击文章标题，跳转到文章详情页面-->
+        <a th:href="@{'/posts/' + ${post.id}}" th:text="${post.title}"></a>
+        <span class="post-date" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+      </li>
+    </ul>
 
-  <hr>
-  <p><a th:href="@{/}">返回首页</a></p>
+    <hr>
+    <p><a th:href="@{/}">返回首页</a></p>
 </div>
 
   <script>
+    // 确保页面加载完成后执行
     document.addEventListener("DOMContentLoaded", function() {
+      // 绑定关注按钮
+
       const followBtn = document.getElementById("followBtn");
+
+
       if (!followBtn) return;
 
+      //给按钮添加一个事件监听器
       followBtn.addEventListener("click", function() {
         const username = followBtn.dataset.username;
         const isFollowing = followBtn.dataset.following === "true";
         const url = `/api/follow/${username}`;
         const method = isFollowing ? "DELETE" : "POST";
 
+        //像服务发生一个post请求
         fetch(url, {
           method: method,
           headers: {
@@ -104,5 +113,6 @@
     });
   </script>
 
-  </body>
+
+</body>
 </html>

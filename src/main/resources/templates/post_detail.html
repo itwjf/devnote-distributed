@@ -26,6 +26,13 @@
   </span>
   </p>
 
+<!--  点赞模块-->
+  <button id="like-btn"
+          th:data-post-id="${post.id}"
+          th:text="${isLiked} ? '❤️ 已点赞' : '🤍 点赞'">
+  </button>
+
+  <span id="like-count" th:text="${likeCount}"></span>
 
   <!-- 文章内容 -->
   <div class="post-content" th:utext="${post.content}"></div>
@@ -111,5 +118,46 @@
 
   <p><a th:href="@{/}">返回首页</a></p>
 </div>
+
+
+<script>
+  // 当整个页面加载完毕（HTML、CSS、图片等资源都准备好）后执行
+  document.addEventListener("DOMContentLoaded", function() {
+
+    // 获取点赞按钮和显示点赞数的元素
+    const likeBtn = document.getElementById("like-btn");
+    const likeCountSpan = document.getElementById("like-count");
+
+    //监听点赞按钮的点击事件
+    likeBtn.addEventListener("click", function() {
+
+      // 从按钮中获取当前文章的 ID（通过 data-post-id 属性）
+      const postId = this.getAttribute("data-post-id");
+
+      //    使用 fetch 向后端发送异步请求（AJAX）
+      //    URL 形如：/like/5
+      //    方法：POST（对应后端的 @PostMapping("/{postId}")）
+      fetch(`/like/${postId}`, {
+        method: "POST",
+        headers: {
+          // 说明是 AJAX 请求（Spring 可根据此判断是否返回 JSON）
+          "X-Requested-With": "XMLHttpRequest" }
+      })
+              //将服务器响应的数据解析为 JSON 格式
+              .then(response => response.json())
+              //解析后端返回的数据（包含 liked 状态 和 likeCount 数量）
+              .then(data => {
+                // 根据返回的 liked 状态更新按钮文字（实现状态切换）
+                likeBtn.textContent = data.liked ? "❤️ 已点赞" : "🤍 点赞";
+                // 更新点赞数量显示（实时刷新）
+                likeCountSpan.textContent = data.likeCount;
+              })
+
+              // 捕获请求失败的情况（比如网络错误）
+              .catch(err => console.error("点赞失败:", err));
+    });
+  });
+</script>
+
 </body>
 </html>
