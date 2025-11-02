@@ -19,7 +19,8 @@
 
   <!-- 粉丝与关注统计 -->
   <div class="stats">
-    <span th:text="'粉丝：' + ${followersCount}"></span> |
+    <span>粉丝：<span id="fanCount" th:text="${followersCount}">0</span></span>
+<!--    关注数暂时不用改-->
     <span th:text="'关注：' + ${followingCount}"></span>
   </div>
 
@@ -28,20 +29,17 @@
     <a th:href="@{'/user/' + ${profileUser.username} + '/edit'}" class="btn-edit">编辑资料</a>
   </div>
 
-  <!-- 如果不是本人，则显示关注/取关按钮 -->
-  <div th:if="${!isSelf}">
-    <form th:if="${!isFollowing}"
-          th:action="@{'/follow/' + ${profileUser.getUsername()} + '/follow'}"
-          method="post">
-      <button type="submit" class="btn btn-primary">关注</button>
-    </form>
-
-    <form th:if="${isFollowing}"
-          th:action="@{'/follow/' + ${profileUser.getUsername()} + '/unfollow'}"
-          method="post">
-      <button type="submit" class="btn btn-secondary">取消关注</button>
-    </form>
-  </div>
+    <!-- 如果不是本人，显示关注/取消关注按钮（AJAX 版本） -->
+    <!-- 收到后端传来的JSON数据，渲染到前端页面上-->
+    <div th:if="${!isSelf}">
+      <button id="followBtn"
+              class="btn"
+              th:classappend="${isFollowing} ? ' btn-secondary' : ' btn-primary'"
+              th:data-username="${profileUser.username}"
+              th:data-following="${isFollowing}">
+        <span th:text="${isFollowing} ? '取消关注' : '关注'"></span>
+      </button>
+    </div>
 
 
   <hr>
@@ -63,5 +61,48 @@
   <hr>
   <p><a th:href="@{/}">返回首页</a></p>
 </div>
-</body>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const followBtn = document.getElementById("followBtn");
+      if (!followBtn) return;
+
+      followBtn.addEventListener("click", function() {
+        const username = followBtn.dataset.username;
+        const isFollowing = followBtn.dataset.following === "true";
+        const url = `/api/follow/${username}`;
+        const method = isFollowing ? "DELETE" : "POST";
+
+        fetch(url, {
+          method: method,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+                .then(res => res.json())
+                .then(data => {
+                  if (data.success) {
+                    followBtn.dataset.following = (!isFollowing).toString();
+                    followBtn.querySelector("span").textContent = isFollowing ? "关注" : "已关注";
+                    followBtn.classList.toggle("btn-primary", isFollowing);
+                    followBtn.classList.toggle("btn-secondary", !isFollowing);
+
+                    const fanCountEl = document.getElementById("fanCount");
+                    if (fanCountEl) {
+                      let count = parseInt(fanCountEl.textContent);
+                      fanCountEl.textContent = isFollowing ? count - 1 : count + 1;
+                    }
+                  } else {
+                    alert(data.message);
+                  }
+                })
+                .catch(err => {
+                  console.error("请求失败", err);
+                  alert("操作失败，请稍后再试。");
+                });
+      });
+    });
+  </script>
+
+  </body>
 </html>

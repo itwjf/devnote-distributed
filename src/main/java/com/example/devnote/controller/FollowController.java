@@ -5,19 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
-@Controller
-@RequestMapping("/follow")
+@RestController
+@RequestMapping("/api/follow")
 public class FollowController {
 
-    @Autowired
     private  final FollowService followService;
 
     public FollowController(FollowService followService) {
@@ -27,46 +26,37 @@ public class FollowController {
     /**
      * 关注用户
      */
-    @PostMapping("/{username}/follow")
-    public String follow(@PathVariable String username,
-                         @AuthenticationPrincipal UserDetails currentUser,
-                         RedirectAttributes redirectAttributes){
-        System.out.println("正在尝试关注用户：" + username + "，发起人：" + currentUser.getUsername());
-
+    @PostMapping("/{username}")
+    public Map<String, Object> followUser(@PathVariable String username,
+                                          @AuthenticationPrincipal UserDetails currentUser) {
+        Map<String, Object> response = new HashMap<>();
         try {
             followService.follow(currentUser.getUsername(), username);
-            System.out.println("followService.follow() 已执行");
-
-            redirectAttributes.addFlashAttribute("message", "已关注 " + username);
+            response.put("success", true);
+            response.put("message", "关注成功");
         } catch (RuntimeException e) {
-            System.out.println("followService.follow() 执行失败：" + e.getMessage());
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
         }
-
-        // 对 username 进行 UTF-8 URL 编码
-        String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
-        return "redirect:/user/" + encodedUsername;
+        return response;
     }
 
     /**
      * 取消关注
      */
-    @PostMapping("/{username}/unfollow")
-    public String unfollow(@PathVariable String username,
-                           @AuthenticationPrincipal UserDetails currentUser,
-                           RedirectAttributes redirectAttributes) {
-        System.out.println("收到取消关注请求：当前用户 = " + currentUser.getUsername() + "，目标用户 = " + username);
-
+    @DeleteMapping("/{username}")
+    public Map<String, Object> unfollowUser(@PathVariable String username,
+                                            @AuthenticationPrincipal UserDetails currentUser) {
+        Map<String, Object> response = new HashMap<>();
         try {
             followService.unfollow(currentUser.getUsername(), username);
-            redirectAttributes.addFlashAttribute("message", "已取消关注 " + username);
+            response.put("success", true);
+            response.put("message", "取消关注成功");
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
         }
-
-        String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
-
-        return "redirect:/user/" + encodedUsername;
+        return response;
     }
 
 }
