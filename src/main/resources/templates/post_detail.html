@@ -26,13 +26,18 @@
   </span>
   </p>
 
-<!--  点赞模块-->
-  <button id="like-btn"
-          th:data-post-id="${post.id}"
-          th:text="${isLiked} ? '❤️ 已点赞' : '🤍 点赞'">
-  </button>
+  <!-- ========================= -->
+  <!-- 点赞 + 收藏 显示部分 -->
+  <!-- ========================= -->
+  <div>
+    <!-- 点赞按钮 -->
+    <button id="like-btn" data-post-id="[[${post.id}]]">🤍 点赞</button>
+    <span id="like-count" th:text="${likeCount}">0</span>
 
-  <span id="like-count" th:text="${likeCount}"></span>
+    <!-- 收藏按钮 -->
+    <button id="favorite-btn" data-post-id="[[${post.id}]]">🤍 收藏</button>
+    <span id="favorite-count"  th:text="${favoriteCount}">0</span>
+  </div>
 
   <!-- 文章内容 -->
   <div class="post-content" th:utext="${post.content}"></div>
@@ -120,44 +125,70 @@
 </div>
 
 
-<script>
-  // 当整个页面加载完毕（HTML、CSS、图片等资源都准备好）后执行
-  document.addEventListener("DOMContentLoaded", function() {
+<!-- ========================= -->
+<!-- JavaScript 逻辑部分 -->
+<!-- ========================= -->
+<script th:inline="javascript">
+  console.log("✅ JS已加载");
+  document.addEventListener("DOMContentLoaded", function () {
 
-    // 获取点赞按钮和显示点赞数的元素
+    const postId = /*[[${post.id}]]*/ 0;   // 让Thymeleaf渲染出真实的数字
+    console.log("postId =", postId);
+
+    // 获取按钮与计数元素
     const likeBtn = document.getElementById("like-btn");
     const likeCountSpan = document.getElementById("like-count");
+    const favoriteBtn = document.getElementById("favorite-btn");
+    const favoriteCountSpan = document.getElementById("favorite-count");
 
-    //监听点赞按钮的点击事件
-    likeBtn.addEventListener("click", function() {
+    // ✅ 初始化点赞状态
+    fetch(`/like/status/${postId}`)
+            .then(res => res.json())
+            .then(data => {
+              likeBtn.textContent = data.liked ? "❤️ 已点赞" : "🤍 点赞";
+              likeCountSpan.textContent = data.likeCount;
+            })
+            .catch(err => console.error("初始化点赞状态失败:", err));
 
-      // 从按钮中获取当前文章的 ID（通过 data-post-id 属性）
-      const postId = this.getAttribute("data-post-id");
+    // ✅ 初始化收藏状态
+    fetch(`/favorite/status/${postId}`)
+            .then(res => res.json())
+            .then(data => {
+              favoriteBtn.textContent = data.favorited ? "⭐ 已收藏" : "☆ 收藏";
+              favoriteCountSpan.textContent = data.favoriteCount;
+            })
+            .catch(err => console.error("初始化收藏状态失败:", err));
 
-      //    使用 fetch 向后端发送异步请求（AJAX）
-      //    URL 形如：/like/5
-      //    方法：POST（对应后端的 @PostMapping("/{postId}")）
+    // ✅ 点赞点击事件
+    likeBtn.addEventListener("click", function () {
       fetch(`/like/${postId}`, {
         method: "POST",
-        headers: {
-          // 说明是 AJAX 请求（Spring 可根据此判断是否返回 JSON）
-          "X-Requested-With": "XMLHttpRequest" }
+        headers: { "X-Requested-With": "XMLHttpRequest" }
       })
-              //将服务器响应的数据解析为 JSON 格式
-              .then(response => response.json())
-              //解析后端返回的数据（包含 liked 状态 和 likeCount 数量）
+              .then(res => res.json())
               .then(data => {
-                // 根据返回的 liked 状态更新按钮文字（实现状态切换）
                 likeBtn.textContent = data.liked ? "❤️ 已点赞" : "🤍 点赞";
-                // 更新点赞数量显示（实时刷新）
                 likeCountSpan.textContent = data.likeCount;
               })
-
-              // 捕获请求失败的情况（比如网络错误）
               .catch(err => console.error("点赞失败:", err));
     });
+
+    // ✅ 收藏点击事件
+    favoriteBtn.addEventListener("click", function () {
+      fetch(`/favorite/${postId}`, {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      })
+              .then(res => res.json())
+              .then(data => {
+                favoriteBtn.textContent = data.favorited ? "⭐ 已收藏" : "☆ 收藏";
+                favoriteCountSpan.textContent = data.favoriteCount;
+              })
+              .catch(err => console.error("收藏失败:", err));
+    });
+
+    console.log("postId =", postId);
   });
 </script>
-
 </body>
 </html>

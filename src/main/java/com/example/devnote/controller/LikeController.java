@@ -3,10 +3,7 @@ package com.example.devnote.controller;
 
 import com.example.devnote.service.LikeService;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +33,31 @@ public class LikeController {
         response.put("likeCount", likeCount);
 
         // 返回 JSON 响应给前端（前端 AJAX 会根据这个更新页面）
+        return response;
+    }
+
+    /**
+     * 用于获取点赞状态 和点赞数量
+     *
+     */
+    @GetMapping("/status/{postId}")
+    public Map<String, Object> getLikeStatus(@PathVariable Long postId, Authentication authentication) {
+
+        //authentication
+        //Spring Security 自动注入的用户认证信息，若未登录则为 null。
+        String username = authentication != null ? authentication.getName() : null;
+
+        long likeCount = likeService.countLikes(postId);
+        boolean isLiked = false;
+
+        // 如果用户已登录，则判断是否已点赞
+        if (username != null) {
+            isLiked = likeService.isLikedByUser(username, postId);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("liked", isLiked);
+        response.put("likeCount", likeCount);
         return response;
     }
 
