@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -40,12 +42,19 @@ public class BlogController {
     private final CommentRepository commentRepository;
     private final FollowService followService;
 
+    private final FollowRepository followRepository;
+
     //用构造函数注入
-    public BlogController(PostRepository postRepository, UserRepository userRepository,CommentRepository commentRepository,FollowService followService) {
+    public BlogController(PostRepository postRepository,
+                          UserRepository userRepository,
+                          CommentRepository commentRepository,
+                          FollowService followService,
+                          FollowRepository followRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.followService = followService;
+        this.followRepository = followRepository;
     }
 
     /**
@@ -55,12 +64,46 @@ public class BlogController {
      * Model 是 Spring 提供的对象，用于向页面传递数据
      */
     @GetMapping({"/","/posts"})
-    public String index(Model model) {
-        // 调用 Repository 查询所有文章
-        //查询的时候按照时间倒序排列，使用户体验更好
-        List<Post> posts = postRepository.findAll(Sort.by(Sort.Direction.DESC,"createdAt"));//使用了 Spring Data JPA 的排序功能，保持用户体验一致性
+    public String index(Model model,Authentication authentication) {
+        List<Post> visiblePosts = new ArrayList<>();
+
+        //如果未登录，则只允许查看PUBLIC公开权限的文章
+        if (authentication == null){
+            visiblePosts = postRepository.findByVisibilityOrderByCreatedAtDesc("PUBLIC");
+        }else {
+            String username = authentication.getName();
+            User currentUser = userRepository.findByUsername(username);
+
+            //拿到当前登录用户发布的文章
+            List<Post> ownPosts = postRepository.findByAuthorOrderByCreatedAtDesc(currentUser);
+
+            //拿到公开文章
+            List<Post> publicPosts = postRepository.findByVisibilityOrderByCreatedAtDesc("PUBLIC");
+
+            //拿到当前登录用户关注的人的发布的”粉丝可见“的文章
+            List<User> following = followRepository.findFollowingUsers(currentUser);
+
+            List<Post> followerVisiblePosts = new ArrayList<>();
+            for (User followed : following) {
+                followerVisiblePosts.addAll(postRepository.findByAuthorAndVisibilityOrderByCreatedAtDesc(followed, "FOLLOWERS"));
+            }
+
+            // 合并
+            visiblePosts.addAll(publicPosts);
+            visiblePosts.addAll(ownPosts);
+            visiblePosts.addAll(followerVisiblePosts);
+
+            // 去重（防止同一篇文章多次出现）
+            visiblePosts = visiblePosts.stream()
+                    .distinct()
+                    //根据创建时间去重
+                    .sorted(Comparator.comparing(Post::getCreatedAt).reversed())
+                    .toList();
+        }
+
+
         // 把数据放入 Model，键是 "posts"，值是文章列表
-        model.addAttribute("posts",posts);
+        model.addAttribute("posts", visiblePosts);
         // 返回视图名称：index.html
         // Spring 会自动去 templates/ 目录下找 index.html
         return "index";

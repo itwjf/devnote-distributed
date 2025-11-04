@@ -34,4 +34,11 @@ public interface PostRepository extends JpaRepository<Post,Long> {
      * @return 文章列表
      */
     List<Post> findByAuthorOrderByCreatedAtDesc(User user);
+
+    //根据权限查文章
+    List<Post> findByVisibilityOrderByCreatedAtDesc(String visibility);
+
+    //查指定作者+可见性
+    List<Post> findByAuthorAndVisibilityOrderByCreatedAtDesc(User user,String visibility);
+
 }
