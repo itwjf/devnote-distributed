@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 收藏 实体类
+ */
 @Entity
 @Data
 @NoArgsConstructor

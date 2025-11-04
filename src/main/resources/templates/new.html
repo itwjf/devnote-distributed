@@ -24,12 +24,14 @@
                    required>
         </div>
 
-        <label for="visibility">访问权限：</label>
-        <select id="visibility" name="visibility" required>
-            <option value="PUBLIC">公开</option>
-            <option value="FOLLOWERS">粉丝可见</option>
-            <option value="PRIVATE">私密</option>
-        </select>
+        <div class="form-group">
+            <label for="visibility">访问权限：</label>
+            <select id="visibility" name="visibility" th:field="*{visibility}" class="form-control">
+                <option value="PUBLIC" th:selected="${post.visibility == null || post.visibility == 'PUBLIC'}">公开</option>
+                <option value="FOLLOWERS" th:selected="${post.visibility == 'FOLLOWERS'}">粉丝可见</option>
+                <option value="PRIVATE" th:selected="${post.visibility == 'PRIVATE'}">仅自己可见</option>
+            </select>
+        </div>
 
 
         <div class="mb-3">

@@ -7,6 +7,7 @@ import com.example.devnote.repository.CommentRepository;
 import com.example.devnote.repository.FollowRepository;
 import com.example.devnote.repository.PostRepository;
 import com.example.devnote.repository.UserRepository;
+import com.example.devnote.service.FollowService;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -37,14 +38,14 @@ public class BlogController {
     private final UserRepository userRepository;
 
     private final CommentRepository commentRepository;
-    private final FollowRepository followRepository;
+    private final FollowService followService;
 
     //用构造函数注入
-    public BlogController(PostRepository postRepository, UserRepository userRepository,CommentRepository commentRepository,FollowRepository followRepository) {
+    public BlogController(PostRepository postRepository, UserRepository userRepository,CommentRepository commentRepository,FollowService followService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
-        this.followRepository = followRepository;
+        this.followService = followService;
     }
 
     /**
@@ -107,15 +108,67 @@ public class BlogController {
      * @return
      */
     @GetMapping("/posts/{id}")
-    public String viewPost(@PathVariable Long id,Model model,Principal principal){
+    public String viewPost(@PathVariable Long id,
+                           Model model,
+                           Authentication authentication){
+
+        // 1. 查找文章实体（不存在则抛异常或返回 404）
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("文章未找到"));
 
+        // 2. 获取当前登录用户名（若未登录则为 null）
+        String currentUsername = (authentication != null && authentication.isAuthenticated())
+                ? authentication.getName()
+                : null;
+
+        // 3. 默认不允许查看，之后逐步判断是否有权限
+        boolean canView = false;
+
+        System.out.println("=== 调试信息 ===");
+        System.out.println("文章ID: " + id);
+        System.out.println("可见性: " + post.getVisibility());
+        System.out.println("当前用户: " + currentUsername);
+        System.out.println("================");
+
+        // 3.1 公开文章：任何人都可以查看（包括匿名）
+        if ("PUBLIC".equalsIgnoreCase(post.getVisibility())) {
+            canView = true;
+        }// 3.2 私密文章：只有作者本人可以查看
+        else if ("PRIVATE".equalsIgnoreCase(post.getVisibility())) {
+            if (post.getAuthor().getUsername().equals(currentUsername)) {
+                canView = true;
+            }
+        }
+        // 3.3 粉丝可见：作者本人或已关注作者的用户可以查看
+        else if ("FOLLOWERS".equalsIgnoreCase(post.getVisibility())) {
+            // 作者本人可见
+            if (post.getAuthor().getUsername().equals(currentUsername)) {
+                canView = true;
+            } else if (currentUsername != null) {
+                // 非本人则需要询问 FollowService：currentUser 是否关注了 post.author
+                User currentUser = userRepository.findByUsername(currentUsername);
+                if (currentUser != null) {
+                    boolean isFollowing = followService.isFollowing(currentUsername, post.getAuthor().getUsername());
+                    if (isFollowing) {
+                        canView = true;
+                    }
+                }
+            }
+        }
+
+        // 4. 如果无权限，返回 no_access 页面（并展示原因）
+        if (!canView) {
+            model.addAttribute("post", post); // 可以在 no_access 页面显示文章作者/visibility 等信息
+            return "no_access";
+        }
+
+        // 5. 有权限则正常加载文章与评论等
         List<Comment> comments = commentRepository.findByPostAndParentIsNullOrderByCreatedAtAsc(post);
+        model.addAttribute("post", post);
+        model.addAttribute("comments", comments);
 
-
-        model.addAttribute("post",post);
-        model.addAttribute("comments",comments);
+        // 传递当前用户信息（供前端显示删除/编辑按钮等）
+        model.addAttribute("currentUsername", currentUsername);
 
         return "post_detail";
     }

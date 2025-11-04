@@ -67,15 +67,11 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
+    //权限控制字段
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Visibility visibility = Visibility.PUBLIC;
+    private String visibility = "PUBLIC";
 
-    public enum Visibility{
-        PUBLIC,
-        FOLLOWERS,
-        PRIVATE,
-    }
+
 
 
     public Post() {
@@ -132,11 +128,11 @@ public class Post {
         this.comments = comments;
     }
 
-    public Visibility getVisibility() {
+    public String getVisibility() {
         return visibility;
     }
 
-    public void setVisibility(Visibility visibility) {
+    public void setVisibility(String visibility) {
         this.visibility = visibility;
     }
 }
