@@ -12,12 +12,16 @@ import java.util.List;
 @Service
 public class UserService {
 
-    @Autowired
+
     private UserRepository userRepository;
 
-    @Autowired
+
     private PostRepository postRepository;
 
+    public UserService(UserRepository userRepository, PostRepository postRepository) {
+        this.userRepository = userRepository;
+        this.postRepository = postRepository;
+    }
 
     /**
      * 根据用户名查询用户信息
@@ -33,5 +37,26 @@ public class UserService {
         return postRepository.findByAuthorOrderByCreatedAtDesc(user);
     }
 
-
+    /**
+     * 更新用户隐私设置
+     * @param username 用户名
+     * @param showFollowers 是否公开粉丝列表
+     * @param showFollowing 是否公开关注列表
+     * @param showLikes 是否公开点赞列表
+     * @param showFavorites 是否公开收藏列表
+     */
+    public void updatePrivacySettings(String username,
+                                      boolean showFollowers,
+                                      boolean showFollowing,
+                                      boolean showLikes,
+                                      boolean showFavorites) {
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            user.setShowFollowers(showFollowers);
+            user.setShowFollowing(showFollowing);
+            user.setShowLikes(showLikes);
+            user.setShowFavorites(showFavorites);
+            userRepository.save(user);
+        }
+    }
 }

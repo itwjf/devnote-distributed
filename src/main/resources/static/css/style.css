@@ -158,9 +158,38 @@
     background-color: #0056b3;
 }
 
-.avatar-preview {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-top: 8px;
+
+
+/* 确保头像图片不会过大 */
+.avatar {
+    width: 100px; /* 设定宽度为100px */
+    height: 100px; /* 设定高度为100px */
+    object-fit: cover; /* 保持图片比例且不会变形 */
+    border-radius: 50%; /* 使头像变圆形 */
+}
+
+.profile-actions {
+    margin-top: 10px;
+}
+
+.profile-actions .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-right: 8px;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.profile-actions .btn:hover {
+    background-color: #2980b9;
+}
+
+.profile-actions .btn-secondary {
+    background-color: #555;
+}
+
+.profile-actions .btn-secondary:hover {
+    background-color: #333;
 }

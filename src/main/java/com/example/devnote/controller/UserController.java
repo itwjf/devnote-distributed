@@ -4,6 +4,7 @@ import com.example.devnote.entity.Post;
 import com.example.devnote.entity.User;
 import com.example.devnote.repository.UserRepository;
 import com.example.devnote.service.FollowService;
+import com.example.devnote.service.PostService;
 import com.example.devnote.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,21 +26,23 @@ import java.util.List;
 @Controller
 public class UserController {
 
-    @Autowired
+
     private final UserService userService;
 
-    @Autowired
+
     private final UserRepository userRepository;
 
-    @Autowired
+
     private final FollowService followService;
 
-    public UserController(UserService userService, UserRepository userRepository, FollowService followService) {
+    private final PostService postService;
+
+    public UserController(UserService userService, UserRepository userRepository, FollowService followService, PostService postService) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.followService = followService;
+        this.postService = postService;
     }
-
 
     @Value("${file.upload-dir}")
     private String uploadDir;// 相对路径，例如 "uploads/avatar/"
@@ -63,6 +66,8 @@ public class UserController {
 
         //查询用户文章
         List<Post> posts = userService.findPostsByUser(user);
+        List<Post> likedPosts = postService.getLikedPosts(username);
+        List<Post> favoritedPosts = postService.getFavoritedPosts(username);
 
         // 判断当前登录用户是否是本人
         boolean isSelf = authentication != null &&
@@ -80,7 +85,9 @@ public class UserController {
         //统计粉丝数与关注数
         long followersCount = followService.countFollowers(username);
         long followingCount = followService.countFollowing(username);
-
+        //获取粉丝和关注列表
+        List<User> followers = followService.getFollowers(username);
+        List<User> following = followService.getFollowing(username);
 
 
         model.addAttribute("profileUser", user);
@@ -89,6 +96,10 @@ public class UserController {
         model.addAttribute("isFollowing",isFollowing);
         model.addAttribute("followersCount", followersCount);
         model.addAttribute("followingCount", followingCount);
+        model.addAttribute("followers", followers);
+        model.addAttribute("following", following);
+        model.addAttribute("likedPosts", likedPosts);
+        model.addAttribute("favoritedPosts", favoritedPosts);
 
         return "user_profile";
     }

@@ -32,6 +32,27 @@ public class User {
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Post> posts;
 
+    /**
+     * 是否公开粉丝列表
+     * true：任何人都可以查看；false：仅自己可见
+     */
+    private boolean showFollowers = true;
+
+    /**
+     * 是否公开关注列表
+     */
+    private boolean showFollowing = true;
+
+    /**
+     * 是否公开点赞列表
+     */
+    private boolean showLikes = false;
+
+    /**
+     * 是否公开收藏列表
+     */
+    private boolean showFavorites = false;
+
     public User() {
     }
 
@@ -95,5 +116,37 @@ public class User {
 
     public void setPosts(List<Post> posts) {
         this.posts = posts;
+    }
+
+    public boolean isShowFollowers() {
+        return showFollowers;
+    }
+
+    public void setShowFollowers(boolean showFollowers) {
+        this.showFollowers = showFollowers;
+    }
+
+    public boolean isShowFollowing() {
+        return showFollowing;
+    }
+
+    public void setShowFollowing(boolean showFollowing) {
+        this.showFollowing = showFollowing;
+    }
+
+    public boolean isShowLikes() {
+        return showLikes;
+    }
+
+    public void setShowLikes(boolean showLikes) {
+        this.showLikes = showLikes;
+    }
+
+    public boolean isShowFavorites() {
+        return showFavorites;
+    }
+
+    public void setShowFavorites(boolean showFavorites) {
+        this.showFavorites = showFavorites;
     }
 }

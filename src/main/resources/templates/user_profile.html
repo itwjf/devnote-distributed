@@ -19,6 +19,13 @@
     <p th:text="${profileUser.bio != null ? profileUser.bio : '这个人很神秘，什么也没写~'}"></p>
   </div>
 
+  <!-- 仅主页所有者本人可见 -->
+  <div th:if="${isSelf}" class="profile-actions">
+    <a th:href="@{'/user/' + ${profileUser.username} + '/edit'}" class="btn-edit">编辑资料</a>
+    <a th:href="@{/settings/privacy}" class="btn btn-secondary">隐私设置</a>
+  </div>
+</div>
+
   <!-- 粉丝与关注统计 -->
   <div class="stats">
     <span>粉丝：<span id="fanCount" th:text="${followersCount}">0</span></span>
@@ -26,10 +33,34 @@
     <span th:text="'关注：' + ${followingCount}"></span>
   </div>
 
-  <!-- 如果是本人，则显示编辑按钮 -->
-  <div th:if="${isSelf}">
-    <a th:href="@{'/user/' + ${profileUser.username} + '/edit'}" class="btn-edit">编辑资料</a>
-  </div>
+  <h3>粉丝列表</h3>
+  <ul>
+    <li th:each="follower : ${followers}">
+      <a th:href="@{'/user/' + ${follower.username}}" th:text="${follower.username}"></a>
+    </li>
+  </ul>
+
+  <h3>关注列表</h3>
+  <ul>
+    <li th:each="follow : ${following}">
+      <a th:href="@{'/user/' + ${follow.username}}" th:text="${follow.username}"></a>
+    </li>
+  </ul>
+
+  <h3>点赞文章</h3>
+  <ul>
+    <li th:each="likedPost : ${likedPosts}">
+      <a th:href="@{'/posts/' + ${likedPost.id}}" th:text="${likedPost.title}"></a>
+    </li>
+  </ul>
+
+  <h3>收藏文章</h3>
+  <ul>
+    <li th:each="favoritedPost : ${favoritedPosts}">
+      <a th:href="@{'/posts/' + ${favoritedPost.id}}" th:text="${favoritedPost.title}"></a>
+    </li>
+  </ul>
+
 
   <!-- 如果不是本人，显示关注/取消关注按钮（AJAX 版本） -->
   <!-- 收到后端传来的JSON数据，渲染到前端页面上-->

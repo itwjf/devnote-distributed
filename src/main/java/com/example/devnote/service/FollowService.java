@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional  //告诉Spring这个方法里的所有数据库操作要么全部成功，要么全部回滚
@@ -84,18 +85,28 @@ public class FollowService {
     /**
      * 获取粉丝列表
      */
-    public List<Follow> getFollowers(String username) {
+    public List<User> getFollowers(String username) {
         User user = userRepository.findByUsername(username);
-        return followRepository.findByFollowing(user);
+        return followRepository.findByFollowing(user).stream()
+                .map(follow -> follow.getFollower()).collect(Collectors.toList());
     }
 
 
     /**
      * 获取关注列表
      */
-    public List<Follow> getFollowing(String username) {
+    public List<User> getFollowing(String username) {
         User user = userRepository.findByUsername(username);
-        return followRepository.findByFollower(user);
+        return followRepository.findByFollower(user)
+                //stream() 是 Java 8 引入的一个方法，用于将集合转换成流（Stream）。
+                // 流是一种能够支持顺序和并行聚合操作的元素集合
+                .stream()
+                //map 是流操作中的一种方法，它接收一个函数作为参数，
+                // 函数的作用是将流中的每个元素（在这里是 Follow 实体）映射到另外一个对象
+                .map(follow -> follow.getFollowing())
+                //collect() 是一个终结操作，用于将流中的元素收集到一个集合中
+                // Collectors.toList() 是一个收集器，它会将流中的所有元素收集到一个 List 集合中
+                .collect(Collectors.toList());
     }
 
     /**
