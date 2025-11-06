@@ -8,7 +8,14 @@ import com.example.devnote.service.PostService;
 import com.example.devnote.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +29,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class UserController {
@@ -85,9 +93,7 @@ public class UserController {
         //统计粉丝数与关注数
         long followersCount = followService.countFollowers(username);
         long followingCount = followService.countFollowing(username);
-        //获取粉丝和关注列表
-        List<User> followers = followService.getFollowers(username);
-        List<User> following = followService.getFollowing(username);
+
 
 
         model.addAttribute("profileUser", user);
@@ -96,8 +102,6 @@ public class UserController {
         model.addAttribute("isFollowing",isFollowing);
         model.addAttribute("followersCount", followersCount);
         model.addAttribute("followingCount", followingCount);
-        model.addAttribute("followers", followers);
-        model.addAttribute("following", following);
         model.addAttribute("likedPosts", likedPosts);
         model.addAttribute("favoritedPosts", favoritedPosts);
 
@@ -172,5 +176,85 @@ public class UserController {
 
         return "redirect:/user/" + encodedUsername;
     }
+
+    // UserController.java
+
+    @GetMapping("/user/{username}/followers")
+    public String viewFollowersPage(
+            @PathVariable String username,
+            Authentication authentication,
+            Model model,
+            @PageableDefault(size = 20) Pageable pageable) {
+
+        User targetUser = userService.findByUsername(username);
+
+        if (targetUser == null) {
+            model.addAttribute("errorCode", "404");
+            model.addAttribute("errorMessage", "用户不存在");
+            return "error";
+        }
+
+        User currentUser = getLoggedInUser(authentication);
+        boolean isSelf = currentUser != null && currentUser.getId().equals(targetUser.getId());
+
+        // 🔒 权限检查：非本人 且 粉丝列表未公开 → 拒绝访问
+        if (!isSelf && !targetUser.isShowFollowers()) {
+            model.addAttribute("errorCode", "403");
+            model.addAttribute("errorMessage", "该用户未公开粉丝列表");
+            return "error";
+        }
+
+        // ✅ 通过权限检查后，才加载数据
+        Page<User> followersPage = followService.getFollowersPage(username, currentUser, pageable);
+
+        model.addAttribute("profileUser", targetUser);
+        model.addAttribute("followersPage", followersPage);
+        model.addAttribute("isSelf", isSelf);
+        return "user_followers";
+    }
+
+    @GetMapping("/user/{username}/following")
+    public String viewFollowingPage(
+            @PathVariable String username,
+            Authentication authentication,
+            Model model,
+            @PageableDefault(size = 20) Pageable pageable) {
+
+        User targetUser = userService.findByUsername(username);
+
+        if (targetUser == null) {
+            model.addAttribute("errorCode", "404");
+            model.addAttribute("errorMessage", "用户不存在");
+            return "error";
+        }
+
+        User currentUser = getLoggedInUser(authentication);
+        boolean isSelf = currentUser != null && currentUser.getId().equals(targetUser.getId());
+
+        // 🔒 权限检查：非本人 且 未公开 → 拒绝访问
+        if (!isSelf && !targetUser.isShowFollowing()) {
+            model.addAttribute("errorCode", "403");
+            model.addAttribute("errorMessage", "该用户未公开关注列表");
+            return "error";
+        }
+
+        // ✅ 加载数据
+        Page<User> followingPage = followService.getFollowingPage(username, currentUser, pageable);
+
+        model.addAttribute("profileUser", targetUser);
+        model.addAttribute("followingPage", followingPage);
+        model.addAttribute("isSelf", isSelf);
+        return "user_following";
+    }
+
+    // 工具方法：从 Authentication 获取当前用户
+    private User getLoggedInUser(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            return userService.findByUsername(authentication.getName());
+        }
+        return null;
+    }
+
+
 
 }

@@ -5,6 +5,8 @@ import com.example.devnote.entity.User;
 import com.example.devnote.repository.FollowRepository;
 import com.example.devnote.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -107,6 +109,35 @@ public class FollowService {
                 //collect() 是一个终结操作，用于将流中的元素收集到一个集合中
                 // Collectors.toList() 是一个收集器，它会将流中的所有元素收集到一个 List 集合中
                 .collect(Collectors.toList());
+    }
+
+    // FollowService.java
+
+    /**
+     *获取粉丝列表分页版
+     */
+    public Page<User> getFollowersPage(String targetUsername, User currentUser, Pageable pageable) {
+        User targetUser = userRepository.findByUsername(targetUsername);
+        if (targetUser == null) throw new RuntimeException("用户不存在");
+
+        boolean isSelf = currentUser != null && currentUser.getUsername().equals(targetUsername);
+        if (!targetUser.isShowFollowers() && !isSelf) {
+            return Page.empty();
+        }
+        return followRepository.findFollowersPage(targetUser, pageable);
+    }
+    /**
+     *获取关注列表分页版
+     */
+    public Page<User> getFollowingPage(String targetUsername, User currentUser, Pageable pageable) {
+        User targetUser = userRepository.findByUsername(targetUsername);
+        if (targetUser == null) throw new RuntimeException("用户不存在");
+
+        boolean isSelf = currentUser != null && currentUser.getUsername().equals(targetUsername);
+        if (!targetUser.isShowFollowing() && !isSelf) {
+            return Page.empty();
+        }
+        return followRepository.findFollowingPage(targetUser, pageable);
     }
 
     /**
