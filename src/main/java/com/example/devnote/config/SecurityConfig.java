@@ -48,7 +48,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         // 放行登录、注册、静态资源
-                        .requestMatchers("/login", "/register", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/login", "/register", "/css/**", "/js/**","/test/**").permitAll()
                         //允许未登录用户查看文章（首页，详情页，错误页面）
                         .requestMatchers("/","/posts/**").permitAll()
                         //写文章必须登录
